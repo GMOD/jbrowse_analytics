@@ -1,0 +1,20 @@
+{
+  "name": "jbrowse_analytics",
+  "description": "Analytics server to track JBrowse usage",
+  "version": "0.1.0",
+  "author": "Robert Buels <rbuels@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GMOD/JBrowseAnalytics"
+  },
+  "dependencies": {
+    "pg": "0",
+    "optimist": "0"
+  },
+  "licenses": [
+    {
+      "type": "Perl",
+      "url": "http://github.com/GMOD/JBrowseAnalytics/raw/master/LICENSE"
+    }
+  ]
+}
