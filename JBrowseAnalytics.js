@@ -1,10 +1,10 @@
 var args = require('optimist').argv;
 
-var numWorkers = args.w || 3;
-var listenPort = args.p || 8080;
-var bindAddress = args.a || '127.0.0.1';
+var numWorkers = args.workers || args.w || 3;
+var listenPort = args.port || args.p || 8080;
+var bindAddress = args.bind || '127.0.0.1';
 
-var pgConnString = args.d;
+var pgConnString = args.db || args.d;
 if( !pgConnString )
     throw("must provide a -d argument");
 
