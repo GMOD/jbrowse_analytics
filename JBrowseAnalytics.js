@@ -4,9 +4,6 @@ var numWorkers = args.workers || args.w || 3;
 var listenPort = args.port || args.p || 8080;
 var bindAddress = args.bind || '127.0.0.1';
 
-var pgConnString = args.db || args.d;
-if( !pgConnString )
-    throw("must provide a -d argument");
 
 var cluster = require('cluster');
 if (cluster.isMaster) {
@@ -22,30 +19,32 @@ if (cluster.isMaster) {
 } else {
     // worker
     var http = require('http');
-    var pg = require('pg');
+    var mysql = require('mysql');
+    var connection = mysql.createClient({
+                                                host     : args.dbhost || 'localhost',
+                                                port     : args.dbport || 3306,
+                                                user     : args.dbuser || 'mysql',
+                                                password : args.dbpass
+                                            });
 
-    pg.connect( pgConnString, function(err, client) {
-        client.on('error', function(err) {
-            console.log(err);
-        });
+    if( args.dbname )
+        connection.query('use '+args.dbname);
 
-        http.createServer(function (req, res) {
-            var url = require('url').parse(req.url,true);
+    http.createServer(function (req, res) {
+        var url = require('url').parse(req.url,true);
 
-            if( url.pathname == '/analytics/clientReport' ) {
-                res.writeHead(200, {'Content-Type': 'image/gif', Connection: 'close'});
-                // serves a tiny empty gif and get rid of the client
-                // before we actually do our work.
-                res.end('\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\xf0\x01\x00\xff\xff\xff\x00\x00\x00\x21\xf9\x04\x01\x0a\x00\x00\x00\x2c\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02\x44\x01\x00\x3b', 'binary');
-                recordStats( req, url, client );
-            } else {
-                res.writeHead(404, {'Content-Type': 'text/plain'});
-                res.end('Not found\n');
-                console.log("Not found: "+req.url);
-            }
-        }).listen( listenPort, bindAddress );
-    });
-
+        if( url.pathname == '/analytics/clientReport' ) {
+            res.writeHead(200, {'Content-Type': 'image/gif', Connection: 'close'});
+            // serves a tiny empty gif and get rid of the client
+            // before we actually do our work.
+            res.end('\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\xf0\x01\x00\xff\xff\xff\x00\x00\x00\x21\xf9\x04\x01\x0a\x00\x00\x00\x2c\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02\x44\x01\x00\x3b', 'binary');
+            recordStats( req, url, connection );
+        } else {
+            res.writeHead(404, {'Content-Type': 'text/plain'});
+            res.end('Not found\n');
+            console.log("Not found: "+req.url);
+        }
+    }).listen( listenPort, bindAddress );
 }
 
 
@@ -69,28 +68,28 @@ var insertQuery = "INSERT INTO jbrowse_usage ("
                   + ",acceptCharset"
                   + ",host"
                   + ") VALUES ("
-                  + "$1"
-                  + ",$2"
-                  + ",$3"
-                  + ",$4"
-                  + ",$5"
-                  + ",$6"
-                  + ",$7"
-                  + ",$8"
-                  + ",$9"
-                  + ",$10"
-                  + ",TIMESTAMP WITH TIME ZONE 'epoch' + $11 * INTERVAL '1 second'"
-                  + ",$12"
-                  + ",$13"
-                  + ",$14"
-                  + ",$15"
-                  + ",$16"
-                  + ",$17"
-                  + ",$18"
+                  + "?"
+                  + ",?"
+                  + ",?"
+                  + ",?"
+                  + ",?"
+                  + ",?"
+                  + ",?"
+                  + ",?"
+                  + ",?"
+                  + ",?"
+                  + ",?"
+                  + ",?"
+                  + ",?"
+                  + ",?"
+                  + ",?"
+                  + ",?"
+                  + ",?"
+                  + ",?"
                   + ")"
 ;
 
-function recordStats ( req, parsedUrl, pgClient ) {
+function recordStats ( req, parsedUrl, mysqlConnection ) {
     var stats = parsedUrl.query;
 
     // get some additional stats from the connection and the headers
@@ -101,10 +100,8 @@ function recordStats ( req, parsedUrl, pgClient ) {
     stats.acceptCharset = req.headers['accept-charset'];
     stats.host = req.headers.host;
 
-    pgClient.query({
-        name: 'insert usage',
-        text: insertQuery,
-        values: [
+    mysqlConnection.query( insertQuery,
+        [
             stats['refSeqs-count'],
             stats['refSeqs-avgLen'],
             stats['tracks-count'],
@@ -123,6 +120,9 @@ function recordStats ( req, parsedUrl, pgClient ) {
             stats['acceptLanguage'],
             stats['acceptCharset'],
             stats['host']
-        ]
-    });
+        ],
+        function(err,results) {
+            if( err ) throw err;
+        }
+    );
 }
