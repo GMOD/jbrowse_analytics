@@ -33,13 +33,10 @@ if (cluster.isMaster) {
             var url = require('url').parse(req.url,true);
 
             if( url.pathname == '/analytics/clientReport' ) {
-                res.writeHead(
-                    200,
-                    { 'Content-Type': 'application/x-javascript',
-                      'Access-Control-Allow-Origin': '*'
-                    });
-                // get rid of the client before we actually do our work.
-                res.end('\n');
+                res.writeHead(200, {'Content-Type': 'image/gif', Connection: 'close'});
+                // serves a tiny empty gif and get rid of the client
+                // before we actually do our work.
+                res.end('\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\xf0\x01\x00\xff\xff\xff\x00\x00\x00\x21\xf9\x04\x01\x0a\x00\x00\x00\x2c\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02\x44\x01\x00\x3b', 'binary');
                 recordStats( req, url, client );
             } else {
                 res.writeHead(404, {'Content-Type': 'text/plain'});
