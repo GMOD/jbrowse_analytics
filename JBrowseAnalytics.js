@@ -13,11 +13,13 @@ if (cluster.isMaster) {
   }
 
   cluster.on('death', function(worker) {
-    console.log('worker ' + worker.process.pid + ' died');
+    console.log('worker ' + worker.process.pid + ' died, spawning a replacement');
+    setTimeout( function() {cluster.fork();}, 1000 );
   });
   console.log('Server running with '+numWorkers+' workers at http://'+bindAddress+':'+listenPort+'/');
 } else {
     // worker
+    console.log('worker '+process.pid+' started');
     var http = require('http');
     var mysql = require('mysql');
     var connection = mysql.createClient({
