@@ -1,4 +1,4 @@
-CREATE TABLE jbrowse_usage (
+CREATE TABLE jbrowse_client_log (
        id int PRIMARY KEY AUTO_INCREMENT,
        refseqCount int,
        refseqAvgLen real,
@@ -15,12 +15,19 @@ CREATE TABLE jbrowse_usage (
        elHeight int,
        elWidth int,
 
-       reportTime datetime,
+       reportTime int,
 
        loadTime real,
 
-       remoteAddr varchar(15),
+       clientAddr varchar(15),
+
        userAgent text,
+
+       uaFamily varchar(15),
+       uaMajor varchar(4),
+       uaMinor varchar(5),
+       uaPatch varchar(10),
+       os      varchar(15),
 
        referer text,
 

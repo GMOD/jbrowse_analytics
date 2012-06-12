@@ -3,7 +3,9 @@ var args = require('optimist').argv;
 var numWorkers = args.workers || args.w || 3;
 var listenPort = args.port || args.p || 8080;
 var bindAddress = args.bind || '127.0.0.1';
-
+var http = require('http');
+var mysql = require('mysql');
+var ua_parser = require('ua-parser');
 
 var cluster = require('cluster');
 if (cluster.isMaster) {
@@ -20,8 +22,6 @@ if (cluster.isMaster) {
 } else {
     // worker
     console.log('worker '+process.pid+' started');
-    var http = require('http');
-    var mysql = require('mysql');
     var connection = mysql.createClient({
                                                 host     : args.dbhost || 'localhost',
                                                 port     : args.dbport || 3306,
@@ -50,7 +50,7 @@ if (cluster.isMaster) {
 }
 
 
-var insertQuery = "INSERT INTO jbrowse_usage ("
+var insertQuery = "INSERT INTO jbrowse_client_log ("
                   + "refseqCount"
                   + ",refseqAvgLen"
                   + ",trackCount"
@@ -63,14 +63,24 @@ var insertQuery = "INSERT INTO jbrowse_usage ("
                   + ",elWidth"
                   + ",reportTime"
                   + ",loadTime"
-                  + ",remoteAddr"
+                  + ",clientAddr"
                   + ",userAgent"
+                  + ",uaFamily"
+                  + ",uaMajor"
+                  + ",uaMinor"
+                  + ",uaPatch"
+                  + ",os"
                   + ",referer"
                   + ",acceptLanguage"
                   + ",acceptCharset"
                   + ",host"
                   + ") VALUES ("
                   + "?"
+                  + ",?"
+                  + ",?"
+                  + ",?"
+                  + ",?"
+                  + ",?"
                   + ",?"
                   + ",?"
                   + ",?"
@@ -97,6 +107,7 @@ function recordStats ( req, parsedUrl, mysqlConnection ) {
     // get some additional stats from the connection and the headers
     stats.remoteAddress = req.connection.remoteAddress;
     stats.userAgent = req.headers['user-agent'];
+    stats.userAgentInfo = ua_parser.parse( stats.userAgent );
     stats.referer = req.headers['referer'];
     stats.acceptLanguage = req.headers['accept-language'];
     stats.acceptCharset = req.headers['accept-charset'];
@@ -118,6 +129,11 @@ function recordStats ( req, parsedUrl, mysqlConnection ) {
             stats['loadTime'],
             stats['remoteAddress'],
             stats['userAgent'],
+            stats.userAgentInfo.family,
+            stats.userAgentInfo.major,
+            stats.userAgentInfo.minor,
+            stats.userAgentInfo.patch,
+            stats.userAgentInfo.os,
             stats['referer'],
             stats['acceptLanguage'],
             stats['acceptCharset'],
