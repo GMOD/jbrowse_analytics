@@ -113,12 +113,21 @@ function recordStats ( req, parsedUrl, mysqlConnection ) {
     stats.acceptCharset = req.headers['accept-charset'];
     stats.host = req.headers.host;
 
+    // construct JSON for the track types
+    var trackTypes = {};
+    var trackTypesRe = /^track-types-/;
+    for( var key in stats ) {
+        if( trackTypesRe.test( key ) ) {
+            trackTypes[ key.replace( trackTypesRe, '') ] = parseInt(stats[key]);
+        }
+    }
+
     mysqlConnection.query( insertQuery,
         [
             stats['refSeqs-count'],
             stats['refSeqs-avgLen'],
             stats['tracks-count'],
-            stats['tracks-types'],
+            JSON.stringify( trackTypes ),
             stats['scn-h'],
             stats['scn-w'],
             stats['win-h'],
