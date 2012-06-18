@@ -6,6 +6,7 @@ var bindAddress = args.bind || '127.0.0.1';
 var http = require('http');
 var mysql = require('mysql');
 var ua_parser = require('ua-parser');
+var url_parser = require('url');
 
 var cluster = require('cluster');
 if (cluster.isMaster) {
@@ -33,7 +34,7 @@ if (cluster.isMaster) {
         connection.query('use '+args.dbname);
 
     http.createServer(function (req, res) {
-        var url = require('url').parse(req.url,true);
+        var url = url_parser.parse(req.url,true);
 
         if( url.pathname == '/analytics/clientReport' ) {
             res.writeHead(200, {'Content-Type': 'image/gif', Connection: 'close'});
@@ -105,13 +106,13 @@ function recordStats ( req, parsedUrl, mysqlConnection ) {
     var stats = parsedUrl.query;
 
     // get some additional stats from the connection and the headers
-    stats.remoteAddress = req.connection.remoteAddress;
+    stats.remoteAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     stats.userAgent = req.headers['user-agent'];
     stats.userAgentInfo = ua_parser.parse( stats.userAgent );
     stats.referer = req.headers['referer'];
     stats.acceptLanguage = req.headers['accept-language'];
     stats.acceptCharset = req.headers['accept-charset'];
-    stats.host = req.headers.host;
+    stats.host = stats.referer ? url_parser.parse(stats.referer).host : null;
 
     // construct JSON for the track types
     var trackTypes = {};
