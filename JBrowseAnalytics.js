@@ -29,10 +29,10 @@ if (cluster.isMaster) {
     // worker
     console.log('worker '+process.pid+' started');
     var connection = mysql.createClient({
-                                                host     : args.dbhost || 'localhost',
-                                                port     : args.dbport || 3306,
-                                                user     : args.dbuser || 'mysql',
-                                                password : args.dbpass
+                                                host     : process.env.DBHOST || args.dbhost || 'localhost',
+                                                port     : process.env.DBPORT || args.dbport || 3306,
+                                                user     : process.env.DBUSER || args.dbuser || 'mysql',
+                                                password : process.env.DBPASS || args.dbpass
                                             });
 
     if( args.dbname )
