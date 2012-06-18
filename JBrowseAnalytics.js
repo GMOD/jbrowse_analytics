@@ -1,5 +1,10 @@
 var args = require('optimist').argv;
 
+if( args.user )
+    process.setuid(args.user);
+if( args.group )
+    process.setgid(args.group);
+
 var numWorkers = args.workers || args.w || 3;
 var listenPort = args.port || args.p || 8080;
 var bindAddress = args.bind || '127.0.0.1';
