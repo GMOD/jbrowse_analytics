@@ -32,11 +32,9 @@ if (cluster.isMaster) {
                                                 host     : process.env.DBHOST || args.dbhost || 'localhost',
                                                 port     : process.env.DBPORT || args.dbport || 3306,
                                                 user     : process.env.DBUSER || args.dbuser || 'mysql',
-                                                password : process.env.DBPASS || args.dbpass
+                                                password : process.env.DBPASS || args.dbpass,
+						database : args.dbname
                                             });
-
-    if( args.dbname )
-        connection.query('use '+args.dbname);
 
     http.createServer(function (req, res) {
         var url = url_parser.parse(req.url,true);
