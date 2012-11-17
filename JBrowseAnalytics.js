@@ -78,8 +78,10 @@ var insertQuery = "INSERT INTO jbrowse_client_log ("
                   + ",acceptLanguage"
                   + ",acceptCharset"
                   + ",host"
+                  + ",plugins"
                   + ") VALUES ("
                   + "?"
+                  + ",?"
                   + ",?"
                   + ",?"
                   + ",?"
@@ -109,7 +111,7 @@ function recordStats ( req, parsedUrl, mysqlConnection ) {
     var stats = parsedUrl.query;
 
     // get some additional stats from the connection and the headers
-    stats.remoteAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    stats.remoteAddress = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.connection.remoteAddress;
     stats.userAgent = req.headers['user-agent'];
     stats.userAgentInfo = ua_parser.parse( stats.userAgent );
     stats.referer = req.headers['referer'];
@@ -150,7 +152,8 @@ function recordStats ( req, parsedUrl, mysqlConnection ) {
             stats['referer'],
             stats['acceptLanguage'],
             stats['acceptCharset'],
-            stats['host']
+            stats['host'],
+            stats['plugins']
         ],
         function(err,results) {
             if( err ) throw err;
