@@ -78,9 +78,11 @@ var insertQuery = "INSERT INTO jbrowse_client_log ("
                   + ",acceptLanguage"
                   + ",acceptCharset"
                   + ",host"
+                  + ",version"
                   + ",plugins"
                   + ") VALUES ("
                   + "?"
+                  + ",?"
                   + ",?"
                   + ",?"
                   + ",?"
@@ -153,6 +155,7 @@ function recordStats ( req, parsedUrl, mysqlConnection ) {
             stats['acceptLanguage'],
             stats['acceptCharset'],
             stats['host'],
+            stats['ver'],
             stats['plugins']
         ],
         function(err,results) {
