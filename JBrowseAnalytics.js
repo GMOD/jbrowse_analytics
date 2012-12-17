@@ -33,7 +33,7 @@ if (cluster.isMaster) {
                                                 port     : process.env.DBPORT || args.dbport || 3306,
                                                 user     : process.env.DBUSER || args.dbuser || 'mysql',
                                                 password : process.env.DBPASS || args.dbpass,
-						database : args.dbname
+                                                database : args.dbname || undefined
                                             });
 
     http.createServer(function (req, res) {
