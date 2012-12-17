@@ -1,10 +1,15 @@
 CREATE TABLE jbrowse_client_log (
        id int PRIMARY KEY AUTO_INCREMENT,
+
+       version varchar( 7 ),
+
        refseqCount int,
        refseqAvgLen real,
 
        trackCount int,
        trackTypes text,
+
+       plugins text,
 
        screenHeight int,
        screenWidth int,
