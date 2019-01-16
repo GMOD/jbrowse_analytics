@@ -8,7 +8,7 @@
     "url": "https://github.com/GMOD/JBrowseAnalytics"
   },
   "dependencies": {
-    "mysql": "0",
+    "mysql": "^2.16.0",
     "optimist": "0",
     "ua-parser": "0"
   },
